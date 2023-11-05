@@ -1,88 +1,131 @@
 <script setup lang="ts">
 import WelcomeItem from './WelcomeItem.vue'
-import DocumentationIcon from './icons/IconDocumentation.vue'
-import ToolingIcon from './icons/IconTooling.vue'
-import EcosystemIcon from './icons/IconEcosystem.vue'
-import CommunityIcon from './icons/IconCommunity.vue'
-import SupportIcon from './icons/IconSupport.vue'
+import {
+  getCurrentInstance,
+  type ComponentCustomProperties,
+  type ComponentInternalInstance,
+  ref
+} from 'vue'
+import type { ProderT } from 'universal-social-auth/dist/providers'
+
+// Button Method 1
+import { Providers } from 'universal-social-auth'
+
+// Button Method 2
+import { Github, Facebook, Google, Twitter } from 'universal-social-auth'
+// const MycustomProvider = {
+//   // Mycustom provider datas
+// }
+
+interface User {
+  provider: string
+  code: string
+}
+interface ReData {
+  provider: string
+  code: string
+}
+
+const globalProperties = <ComponentInternalInstance>getCurrentInstance()
+const box: ComponentCustomProperties = <ComponentCustomProperties>(
+  globalProperties.appContext.config.globalProperties
+)
+
+const perData = { provider: '', code: '' }
+
+const responseData = ref<ReData>(perData)
+const hash = ref('')
+const data = ref({ tok: '' })
+
+// Below are the functions to use inside you export default be `Vue3 Setup()` or `Vue2 data()` or other `Framework`
+
+function useAuthProvider(provider: string, proData: Record<string, unknown> | null) {
+  const pro = <ProderT>proData
+
+  const ProData = pro || <ProderT>Providers[provider]
+  box.$Oauth
+    .authenticate(provider, ProData)
+    .then((response) => {
+      const rsp: { code: string } = <{ code: string }>response
+      if (rsp.code) {
+        responseData.value.code = rsp.code
+        responseData.value.provider = provider
+        useSocialLogin()
+      }
+    })
+    .catch((err: unknown) => {
+      console.log(err)
+    })
+}
+
+async function useLoginFirst(e: User) {
+  // this sample of how to pust user data to my store
+  // const firstlogin: boolean = await box.$auth.firstlogin(e)
+  if (e) {
+    const msg = `Welcome To My App`
+    alert(msg)
+    // await box.$router.push({ name: 'dashboard' })
+    return
+  }
+}
+
+function useSocialLogin() {
+  // otp from input Otp form
+  // hash user data in your backend with Cache or save to database
+  const pdata = { code: responseData.value.code, otp: data.value.tok, hash: hash.value }
+  box.$axios
+    .post('https://api.diadal.com.ng/social-login/' + responseData.value.provider, pdata)
+    .then(async (response) => {
+      // `response` data base on your backend config
+      if (response.data.status === 444) {
+        hash.value = response.data.hash
+        // fauth.value = true // Option show Otp form incase you using 2fa or any addition security apply to your app you can handle all that from here
+      } else if (response.data.status === 445) {
+        //do something Optional
+      } else {
+        await useLoginFirst(response.data.u)
+      }
+    })
+    .catch((err: unknown) => {
+      console.log(err)
+    })
+}
+// Optional for Native App listen to the event `OauthCall` from your page component main.[js|ts] or app.[js|ts]
+
+// emitter.on('OauthCall', (e) => {
+//   if (e) {
+//     responseData.value.code = e
+//     useSocialLogin()
+//   }
+// })
 </script>
 
 <template>
   <WelcomeItem>
-    <template #icon>
-      <DocumentationIcon />
-    </template>
     <template #heading>Documentation</template>
 
-    Vue’s
-    <a href="https://vuejs.org/" target="_blank" rel="noopener">official documentation</a>
-    provides you with all information you need to get started.
+    "universal-social-auth test for vue3
+    <a href="https://github.com/diadal/universal-social-auth/" target="_blank" rel="noopener"
+      >official documentation</a
+    >
+    "
   </WelcomeItem>
 
   <WelcomeItem>
-    <template #icon>
-      <ToolingIcon />
-    </template>
-    <template #heading>Tooling</template>
+    <template #heading>Method 1</template>
 
-    This project is served and bundled with
-    <a href="https://vitejs.dev/guide/features.html" target="_blank" rel="noopener">Vite</a>. The
-    recommended IDE setup is
-    <a href="https://code.visualstudio.com/" target="_blank" rel="noopener">VSCode</a> +
-    <a href="https://github.com/johnsoncodehk/volar" target="_blank" rel="noopener">Volar</a>. If
-    you need to test your components and web pages, check out
-    <a href="https://www.cypress.io/" target="_blank" rel="noopener">Cypress</a> and
-    <a href="https://on.cypress.io/component" target="_blank" rel="noopener"
-      >Cypress Component Testing</a
-    >.
-
-    <br />
-
-    More instructions are available in <code>README.md</code>.
+    <button @click="useAuthProvider('github', null)">auth Github</button>
+    <!-- <button @click="useAuthProvider('facebook', null)">auth Facebook</button>
+    <button @click="useAuthProvider('google', null)">auth Google</button>
+    <button @click="useAuthProvider('twitter', null)">auth Twitter</button> -->
   </WelcomeItem>
-
   <WelcomeItem>
-    <template #icon>
-      <EcosystemIcon />
-    </template>
-    <template #heading>Ecosystem</template>
+    <template #heading>Method 2</template>
 
-    Get official tools and libraries for your project:
-    <a href="https://pinia.vuejs.org/" target="_blank" rel="noopener">Pinia</a>,
-    <a href="https://router.vuejs.org/" target="_blank" rel="noopener">Vue Router</a>,
-    <a href="https://test-utils.vuejs.org/" target="_blank" rel="noopener">Vue Test Utils</a>, and
-    <a href="https://github.com/vuejs/devtools" target="_blank" rel="noopener">Vue Dev Tools</a>. If
-    you need more resources, we suggest paying
-    <a href="https://github.com/vuejs/awesome-vue" target="_blank" rel="noopener">Awesome Vue</a>
-    a visit.
-  </WelcomeItem>
-
-  <WelcomeItem>
-    <template #icon>
-      <CommunityIcon />
-    </template>
-    <template #heading>Community</template>
-
-    Got stuck? Ask your question on
-    <a href="https://chat.vuejs.org" target="_blank" rel="noopener">Vue Land</a>, our official
-    Discord server, or
-    <a href="https://stackoverflow.com/questions/tagged/vue.js" target="_blank" rel="noopener"
-      >StackOverflow</a
-    >. You should also subscribe to
-    <a href="https://news.vuejs.org" target="_blank" rel="noopener">our mailing list</a> and follow
-    the official
-    <a href="https://twitter.com/vuejs" target="_blank" rel="noopener">@vuejs</a>
-    twitter account for latest news in the Vue world.
-  </WelcomeItem>
-
-  <WelcomeItem>
-    <template #icon>
-      <SupportIcon />
-    </template>
-    <template #heading>Support Vue</template>
-
-    As an independent project, Vue relies on community backing for its sustainability. You can help
-    us by
-    <a href="https://vuejs.org/sponsor/" target="_blank" rel="noopener">becoming a sponsor</a>.
+    <button @click="useAuthProvider('github', Github)">auth Github</button>
+    <!-- <button @click="useAuthProvider('facebook', Facebook)">auth Facebook</button>
+    <button @click="useAuthProvider('google', Google)">auth Google</button>
+    <button @click="useAuthProvider('twitter', Twitter)">auth Twitter</button> -->
+    <!-- <button @click="useAuthProvider('mycustom', Mycustom)">auth Mycustom</button> -->
   </WelcomeItem>
 </template>

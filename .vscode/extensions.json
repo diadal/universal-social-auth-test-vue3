@@ -1,8 +1,14 @@
 {
   "recommendations": [
+    "dbaeumer.vscode-eslint",
+    "esbenp.prettier-vscode",
     "Vue.volar",
     "Vue.vscode-typescript-vue-plugin",
-    "dbaeumer.vscode-eslint",
-    "esbenp.prettier-vscode"
+
+  ],
+  "unwantedRecommendations": [
+    "hookyqr.beautify",
+    "dbaeumer.jshint",
+    "ms-vscode.vscode-typescript-tslint-plugin"
   ]
 }
