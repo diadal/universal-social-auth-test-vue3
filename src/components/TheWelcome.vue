@@ -73,6 +73,7 @@ function useSocialLogin() {
   // otp from input Otp form
   // hash user data in your backend with Cache or save to database
   const pdata = { code: responseData.value.code, otp: data.value.tok, hash: hash.value }
+  console.log('pdata: ', pdata)
   box.$axios
     .post('https://api.diadal.com.ng/social-login/' + responseData.value.provider, pdata)
     .then(async (response) => {

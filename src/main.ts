@@ -25,8 +25,8 @@ const options = {
     //   redirectUri: 'https://myapp.com/auth/github/callback'
     // },
     github: {
-      clientId: '78bfc07e1f25b5e22c26',
-      redirectUri: 'https://diadal.com.ng/auth/github/callback' // change to your app frontpage url to match your route  path: '/auth/:provider/callback',
+      clientId: '7db089adf03467bec815',
+      redirectUri: 'http://localhost:3000/auth/github/callback' // change to your app frontpage url to match your route  path: '/auth/:provider/callback',
     }
     // twitch: {
     //   clientId: 'qi4vbk30uuvuqigcd5ioq3egxf67m8',
